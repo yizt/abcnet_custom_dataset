@@ -1,0 +1,2 @@
+# abcnet_custom_dataset
+ABCNet 自定义数据集制作,将ICDAR15转为ABCNet标注格式
