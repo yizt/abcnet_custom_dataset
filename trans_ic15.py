@@ -43,6 +43,9 @@ def load_ic15(annotation_path, image_dir):
         # 左上、右上、右下、左下 四个坐标 如：377,117,463,117,465,130,378,130
         lt_x, lt_y, rt_x, rt_y, rb_x, rb_y, lb_x, lb_y = map(float, line[:8])
         text = line[8]
+        # 模糊标记不要
+        if text == '###':
+            continue
         x_min, y_min, x_max, y_max = min(lt_x, lb_x), min(lt_y, rt_y), max(rt_x, rb_x), max(lb_y, rb_y)
         bbox.append([y_min, x_min, y_max, x_max])
         quadrilateral.append([lt_x, lt_y, rt_x, rt_y, rb_x, rb_y, lb_x, lb_y])
@@ -159,70 +162,72 @@ def gen_abc_json(abc_gt_dir, abc_json_path, image_dir):
     # 遍历abcnet txt 标注
     indexes = sorted([f.split('.')[0]
                       for f in os.listdir(abc_gt_dir)])
+    print(indexes)
 
-    j = 1
+    j = 1  # 标注边框id号
     for index in indexes:
         # if int(index) >3: continue
         print('Processing: ' + index)
-        im = cv2.imread(os.path.join(image_dir) + index + '.jpg')
+        im = cv2.imread(os.path.join(image_dir, '{}.jpg'.format(index)))
         height, width, _ = im.shape
         dataset['images'].append({
             'coco_url': '',
             'date_captured': '',
             'file_name': index + '.jpg',
             'flickr_url': '',
-            'id': int(index),
+            'id': int(index.split('_')[-1]),  # img_1
             'license': 0,
             'width': width,
             'height': height
         })
-        anno_file = os.path.join(abc_gt_dir) + index + '.txt'
+        anno_file = os.path.join(abc_gt_dir, '{}.txt'.format(index))
 
         with open(anno_file) as f:
             lines = [line for line in f.readlines() if line.strip()]
-            for i, line in enumerate(lines):
-                pttt = line.strip().split('||||')
-                parts = pttt[0].split(',')
-                ct = pttt[-1].strip()
+        for i, line in enumerate(lines):
+            pttt = line.strip().split('||||')
+        parts = pttt[0].split(',')
+        ct = pttt[-1].strip()
 
-                cls = 'text'
-                segs = [float(kkpart) for kkpart in parts[:16]]
+        cls = 'text'
+        segs = [float(kkpart) for kkpart in parts[:16]]
 
-                xt = [segs[ikpart] for ikpart in range(0, len(segs), 2)]
-                yt = [segs[ikpart] for ikpart in range(1, len(segs), 2)]
-                xmin = min([xt[0], xt[3], xt[4], xt[7]])
-                ymin = min([yt[0], yt[3], yt[4], yt[7]])
-                xmax = max([xt[0], xt[3], xt[4], xt[7]])
-                ymax = max([yt[0], yt[3], yt[4], yt[7]])
-                width = max(0, xmax - xmin + 1)
-                height = max(0, ymax - ymin + 1)
-                if width == 0 or height == 0:
-                    continue
+        xt = [segs[ikpart] for ikpart in range(0, len(segs), 2)]
+        yt = [segs[ikpart] for ikpart in range(1, len(segs), 2)]
+        xmin = min([xt[0], xt[3], xt[4], xt[7]])
+        ymin = min([yt[0], yt[3], yt[4], yt[7]])
+        xmax = max([xt[0], xt[3], xt[4], xt[7]])
+        ymax = max([yt[0], yt[3], yt[4], yt[7]])
+        width = max(0, xmax - xmin + 1)
+        height = max(0, ymax - ymin + 1)
+        if width == 0 or height == 0:
+            continue
 
-                max_len = 100
-                recs = [len(cV2) + 1 for ir in range(max_len)]
+        max_len = 100
+        recs = [len(cV2) + 1 for ir in range(max_len)]
 
-                ct = str(ct)
-                print('rec', ct)
+        ct = str(ct)
+        print('rec', ct)
 
-                for ix, ict in enumerate(ct):
-                    if ix >= max_len: continue
-                    if ict in cV2:
-                        recs[ix] = cV2.index(ict)
-                    else:
-                        recs[ix] = len(cV2)
+        for ix, ict in enumerate(ct):
+            if ix >= max_len: continue
+            if ict in cV2:
+                recs[ix] = cV2.index(ict)
+            else:
+                recs[ix] = len(cV2)
 
-                dataset['annotations'].append({
-                    'area': width * height,
-                    'bbox': [xmin, ymin, width, height],
-                    'category_id': get_category_id(cls),
-                    'id': j,
-                    'image_id': int(index),
-                    'iscrowd': 0,
-                    'bezier_pts': segs,
-                    'rec': recs
-                })
-                j += 1
+        dataset['annotations'].append({
+            'area': width * height,
+            'bbox': [xmin, ymin, width, height],
+            'category_id': get_category_id(cls),
+            'id': j,
+            'image_id': int(index.split('_')[-1]),  # img_1
+            'iscrowd': 0,
+            'bezier_pts': segs,
+            'rec': recs
+        })
+        j += 1
+
     # 写入json文件
     folder = os.path.dirname(abc_json_path)
     if not os.path.exists(folder):
@@ -245,7 +250,7 @@ def test_ic15_to_abc():
     txt_dir = '/Users/yizuotian/dataset/IC15/abcnet_gt_train'
     json_path = '/Users/yizuotian/dataset/IC15/annotations/train.json'
     os.makedirs(txt_dir, exist_ok=True)
-    # ic15_to_abc(ann_dir, img_dir, txt_dir)
+    ic15_to_abc(ann_dir, img_dir, txt_dir)
 
     gen_abc_json(txt_dir, json_path, img_dir)
 
