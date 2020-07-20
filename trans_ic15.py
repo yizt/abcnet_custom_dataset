@@ -278,10 +278,10 @@ if __name__ == '__main__':
                  --abc-gt-dir $ic_root/abcnet_gt_train \
                  --json-path $ic_root/annotations/train.json
                  
-        python trans_ic15.py --ann-dir $ic_root/Challenge4_Test_Task1_GT \
-                 --image-dir $ic_root/ch4_test_images \
-                 --abc-gt-dir $ic_root/abcnet_gt_test \
-                 --json-path $ic_root/annotations/test.json
+    python trans_ic15.py --ann-dir $ic_root/Challenge4_Test_Task1_GT \
+             --image-dir $ic_root/ch4_test_images \
+             --abc-gt-dir $ic_root/abcnet_gt_test \
+             --json-path $ic_root/annotations/test.json
     """
     parse = argparse.ArgumentParser()
     parse.add_argument("--ann-dir", type=str, default=None)
