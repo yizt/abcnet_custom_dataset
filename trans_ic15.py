@@ -186,6 +186,9 @@ def gen_abc_json(abc_gt_dir, abc_json_path, image_dir):
 
         with open(anno_file) as f:
             lines = [line for line in f.readlines() if line.strip()]
+        # 没有清晰的标注，跳过
+        if len(lines) == 0:
+            continue
         for i, line in enumerate(lines):
             pttt = line.strip().split('||||')
         parts = pttt[0].split(',')
@@ -258,6 +261,7 @@ def test_ic15_to_abc():
 
 
 def main(args):
+    os.makedirs(args.abc_gt_dir, exist_ok=True)
     ic15_to_abc(args.ann_dir, args.image_dir, args.abc_gt_dir)
     gen_abc_json(args.abc_gt_dir, args.json_path, args.image_dir)
 
@@ -266,10 +270,16 @@ if __name__ == '__main__':
     # test_load_ic15()
     # test_ic15_to_abc()
     """
-    Usage python trans_ic15.py --ann-dir /Users/yizuotian/dataset/IC15/ch4_training_localization_transcription_gt \
-                 --image-dir /Users/yizuotian/dataset/IC15/ch4_training_images \
-                 --abc-gt-dir /Users/yizuotian/dataset/IC15/abcnet_gt_train \
-                 --json-path /Users/yizuotian/dataset/IC15/annotations/train.json
+    ic_root=/Users/yizuotian/dataset/IC15
+    Usage python trans_ic15.py --ann-dir $ic_root/ch4_training_localization_transcription_gt \
+                 --image-dir $ic_root/ch4_training_images \
+                 --abc-gt-dir $ic_root/abcnet_gt_train \
+                 --json-path $ic_root/annotations/train.json
+                 
+        python trans_ic15.py --ann-dir $ic_root/Challenge4_Test_Task1_GT \
+                 --image-dir $ic_root/ch4_test_images \
+                 --abc-gt-dir $ic_root/abcnet_gt_test \
+                 --json-path $ic_root/annotations/test.json
     """
     parse = argparse.ArgumentParser()
     parse.add_argument("--ann-dir", type=str, default=None)
