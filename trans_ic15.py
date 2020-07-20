@@ -46,8 +46,8 @@ def load_ic15(annotation_path, image_dir):
         lt_x, lt_y, rt_x, rt_y, rb_x, rb_y, lb_x, lb_y = map(float, line[:8])
         text = line[8]
         # 模糊标记不要
-        if text == '###':
-            continue
+        # if text == '###':
+        #     continue
         x_min, y_min, x_max, y_max = min(lt_x, lb_x), min(lt_y, rt_y), max(rt_x, rb_x), max(lb_y, rb_y)
         bbox.append([y_min, x_min, y_max, x_max])
         quadrilateral.append([lt_x, lt_y, rt_x, rt_y, rb_x, rb_y, lb_x, lb_y])
@@ -270,8 +270,10 @@ if __name__ == '__main__':
     # test_load_ic15()
     # test_ic15_to_abc()
     """
+    
+    Usage:
     ic_root=/Users/yizuotian/dataset/IC15
-    Usage python trans_ic15.py --ann-dir $ic_root/ch4_training_localization_transcription_gt \
+    python trans_ic15.py --ann-dir $ic_root/ch4_training_localization_transcription_gt \
                  --image-dir $ic_root/ch4_training_images \
                  --abc-gt-dir $ic_root/abcnet_gt_train \
                  --json-path $ic_root/annotations/train.json
