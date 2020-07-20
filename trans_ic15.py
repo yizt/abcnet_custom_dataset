@@ -5,10 +5,12 @@
  @Author  : yizuotian
  @Description    :  转换icdar15数据集
 """
+import argparse
 import codecs
 import glob
 import json
 import os
+import sys
 
 import cv2
 import numpy as np
@@ -255,6 +257,24 @@ def test_ic15_to_abc():
     gen_abc_json(txt_dir, json_path, img_dir)
 
 
+def main(args):
+    ic15_to_abc(args.ann_dir, args.image_dir, args.abc_gt_dir)
+    gen_abc_json(args.abc_gt_dir, args.json_path, args.image_dir)
+
+
 if __name__ == '__main__':
     # test_load_ic15()
-    test_ic15_to_abc()
+    # test_ic15_to_abc()
+    """
+    Usage python trans_ic15.py --ann-dir /Users/yizuotian/dataset/IC15/ch4_training_localization_transcription_gt \
+                 --image-dir /Users/yizuotian/dataset/IC15/ch4_training_images \
+                 --abc-gt-dir /Users/yizuotian/dataset/IC15/abcnet_gt_train \
+                 --json-path /Users/yizuotian/dataset/IC15/annotations/train.json
+    """
+    parse = argparse.ArgumentParser()
+    parse.add_argument("--ann-dir", type=str, default=None)
+    parse.add_argument("--image-dir", type=str, default=None)
+    parse.add_argument("--abc-gt-dir", type=str, default=None)
+    parse.add_argument("--json-path", type=str, default=None)
+    arguments = parse.parse_args(sys.argv[1:])
+    main(arguments)
